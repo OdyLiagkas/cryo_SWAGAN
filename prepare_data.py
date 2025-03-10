@@ -48,7 +48,7 @@ def prepare(
     files = sorted(dataset.imgs, key=lambda x: x[0])
     files = [(i, file) for i, (file, label) in enumerate(files)]
     total = 0
-
+    print(len(files))
     with multiprocessing.Pool(n_worker) as pool:
         for i, imgs in tqdm(pool.imap_unordered(resize_fn, files)):
             for size, img in zip(sizes, imgs):
