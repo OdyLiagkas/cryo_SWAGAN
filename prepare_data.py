@@ -48,7 +48,6 @@ def prepare(
     files = sorted(dataset.imgs, key=lambda x: x[0])
     files = [(i, file) for i, (file, label) in enumerate(files)]
     total = 0
-    print("NUMBER OF files:",len(files))
     with multiprocessing.Pool(n_worker) as pool:
         for i, imgs in tqdm(pool.imap_unordered(resize_fn, files)):
             for size, img in zip(sizes, imgs):
@@ -97,7 +96,9 @@ if __name__ == "__main__":
 
     imgset = datasets.ImageFolder(args.path)
 
-    print("imgset size",len(imgset))
+    print("-----imgset size-----",len(imgset))
+    print(imgset.class_to_idx)
+    
     
     with lmdb.open(args.out, map_size=1024 ** 4, readahead=False) as env:
         prepare(env, imgset, args.n_worker, sizes=sizes, resample=resample)
