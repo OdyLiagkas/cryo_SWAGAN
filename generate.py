@@ -27,7 +27,7 @@ def generate(args, g_ema, device, mean_latent):
 
 
 if __name__ == "__main__":
-    device = "cuda"
+    device = "cpu"
 
     parser = argparse.ArgumentParser(description="Generate samples from the generator")
 
