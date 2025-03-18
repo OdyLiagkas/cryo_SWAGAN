@@ -3,7 +3,7 @@ import argparse
 import torch
 from torchvision import utils
 
-from model import Generator
+from swagan import Generator
 
 
 if __name__ == "__main__":
