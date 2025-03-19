@@ -181,7 +181,8 @@ class FromGray(nn.Module):
             self.downsample = Downsample(blur_kernel)
             self.dwt = HaarTransform(1)  # Changed channels to 1
 
-        self.conv = ConvLayer(1 * 4, out_channel, 3)  # Changed input channels to 1
+        self.conv = ConvLayer(1  #* 4
+                              , out_channel, 3)  # Changed input channels to 1
 
     def forward(self, input, skip=None):
         if self.downsample:
