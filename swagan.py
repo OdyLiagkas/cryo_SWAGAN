@@ -9,7 +9,7 @@ from torch.nn import functional as F
 from torch.autograd import Function
 
 from op import FusedLeakyReLU, fused_leaky_relu, upfirdn2d, conv2d_gradfix
-from model import (
+from stylegan import (
     ModulatedConv2d,
     StyledConv,
     ConstantInput,
@@ -140,60 +140,7 @@ class ToRGB(nn.Module):
             out = out + skip
 
         return out
-#--------------FOR GRAYSCALE IMAGES!-----
-class ToGray(nn.Module):  
-    def __init__(self, in_channel, style_dim, upsample=True, blur_kernel=[1, 3, 3, 1]):
-        super().__init__()
 
-        if upsample:
-            self.iwt = InverseHaarTransform(1)  # Changed channels to 1
-            self.upsample = Upsample(blur_kernel)
-            self.dwt = HaarTransform(1)  # Changed channels to 1
-
-        self.conv = ModulatedConv2d(in_channel, 1 * 4, 1, style_dim, demodulate=False)  # Changed output channels to 1
-        self.bias = nn.Parameter(torch.zeros(1, 1 * 4, 1, 1))  # Changed bias channels to 1
-
-    def forward(self, input, style, skip=None):
-        out = self.conv(input, style)
-        out = out + self.bias
-
-        if skip is not None:
-            skip = self.iwt(skip)
-            skip = self.upsample(skip)
-            skip = self.dwt(skip)
-
-            out = out + skip
-
-        return out
-
-class FromGray(nn.Module):
-    def __init__(self, out_channel, downsample=True, blur_kernel=[1, 3, 3, 1]):
-        super().__init__()
-
-        self.downsample = downsample
-
-        if downsample:
-            self.iwt = InverseHaarTransform(1)  # Changed channels to 1
-            self.downsample = Downsample(blur_kernel)
-            self.dwt = HaarTransform(1)  # Changed channels to 1
-
-        self.conv = ConvLayer(1 * 4, out_channel, 3)  # Changed input channels to 1
-
-    def forward(self, input, skip=None):
-        if self.downsample:
-            input = self.iwt(input)
-            input = self.downsample(input)
-            input = self.dwt(input)
-
-        out = self.conv(input)
-
-        if skip is not None:
-            out = out + skip
-
-        return input, out
-
-
-#----------------------------------------
 
 class Generator(nn.Module):
     def __init__(
@@ -238,10 +185,7 @@ class Generator(nn.Module):
         self.conv1 = StyledConv(
             self.channels[4], self.channels[4], 3, style_dim, blur_kernel=blur_kernel
         )
-        self.to_rgb1 = ToRGB(self.channels[4], style_dim, upsample=False)   #OLD
-        #self.to_rgb1 = ToGray(self.channels[4], style_dim, upsample=False)   # Changed to be with ToGray
-        
-
+        self.to_rgb1 = ToRGB(self.channels[4], style_dim, upsample=False)
 
         self.log_size = int(math.log(size, 2)) - 1
         self.num_layers = (self.log_size - 2) * 2 + 1
@@ -278,9 +222,7 @@ class Generator(nn.Module):
                 )
             )
 
-            self.to_rgbs.append(ToRGB(out_channel, style_dim))  #OLD
-            #self.to_rgbs.append(ToGray(out_channel, style_dim))  # Changed to be with ToGray
-
+            self.to_rgbs.append(ToRGB(out_channel, style_dim))
 
             in_channel = out_channel
 
@@ -453,17 +395,12 @@ class Discriminator(nn.Module):
         for i in range(log_size, 2, -1):
             out_channel = channels[2 ** (i - 1)]
 
-            self.from_rgbs.append(FromRGB(in_channel, downsample=i != log_size))   #OLD
-            #self.from_rgbs.append(FromGray(in_channel, downsample=i != log_size))   # Changed to be with FromGray
-
-
+            self.from_rgbs.append(FromRGB(in_channel, downsample=i != log_size))
             self.convs.append(ConvBlock(in_channel, out_channel, blur_kernel))
 
             in_channel = out_channel
 
-        #self.from_rgbs.append(FromRGB(channels[4]))    #OLD
-        self.from_rgbs.append(FromGray(channels[4]))    # Changed to be with FromGray
-
+        self.from_rgbs.append(FromRGB(channels[4]))
 
         self.stddev_group = 4
         self.stddev_feat = 1
