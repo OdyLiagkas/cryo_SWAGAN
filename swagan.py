@@ -238,8 +238,8 @@ class Generator(nn.Module):
         self.conv1 = StyledConv(
             self.channels[4], self.channels[4], 3, style_dim, blur_kernel=blur_kernel
         )
-        #self.to_rgb1 = ToRGB(self.channels[4], style_dim, upsample=False)   #OLD
-        self.to_rgb1 = ToGray(self.channels[4], style_dim, upsample=False)   # Changed to be with ToGray
+        self.to_rgb1 = ToRGB(self.channels[4], style_dim, upsample=False)   #OLD
+        #self.to_rgb1 = ToGray(self.channels[4], style_dim, upsample=False)   # Changed to be with ToGray
         
 
 
@@ -278,8 +278,8 @@ class Generator(nn.Module):
                 )
             )
 
-            #self.to_rgbs.append(ToRGB(out_channel, style_dim))  #OLD
-            self.to_rgbs.append(ToGray(out_channel, style_dim))  # Changed to be with ToGray
+            self.to_rgbs.append(ToRGB(out_channel, style_dim))  #OLD
+            #self.to_rgbs.append(ToGray(out_channel, style_dim))  # Changed to be with ToGray
 
 
             in_channel = out_channel
@@ -453,8 +453,8 @@ class Discriminator(nn.Module):
         for i in range(log_size, 2, -1):
             out_channel = channels[2 ** (i - 1)]
 
-            #self.from_rgbs.append(FromRGB(in_channel, downsample=i != log_size))   #OLD
-            self.from_rgbs.append(FromGray(in_channel, downsample=i != log_size))   # Changed to be with FromGray
+            self.from_rgbs.append(FromRGB(in_channel, downsample=i != log_size))   #OLD
+            #self.from_rgbs.append(FromGray(in_channel, downsample=i != log_size))   # Changed to be with FromGray
 
 
             self.convs.append(ConvBlock(in_channel, out_channel, blur_kernel))
