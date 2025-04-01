@@ -325,7 +325,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                         "args": args,
                         "ada_aug_p": ada_aug_p,
                     },
-                    f"checkpoint/{str(i).zfill(6)}.pt",
+                    f"checkpoint/stylegan_{str(i).zfill(6)}.pt",
                 )
 
 
@@ -526,6 +526,6 @@ if __name__ == "__main__":
     )
 
     if get_rank() == 0 and wandb is not None and args.wandb:
-        wandb.init(project="SWAGAN")
+        wandb.init(project="STYLEGAN")
 
     train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, device)
