@@ -348,7 +348,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                     g_ema.eval()
                     codes = [torch.randn(9, 512, device=device)]
                     images = synthesize(g_ema, codes)
-                    wandb.log({"Generated Images Grid": wandb.Image(grid_np)})
+                    wandb.log({"Generated Images Grid": wandb.Image(images)})
                 torch.save(
                     {
                         "g": g_module.state_dict(),
