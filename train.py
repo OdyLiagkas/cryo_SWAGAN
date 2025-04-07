@@ -57,7 +57,7 @@ def synthesize(generator, codes):
     images, _ = generator( codes
                 , truncation=1, truncation_latent=None
             )   # CODES NEED TO BE IN FORMAT: [torch.randn(1, 512, device=device)]
-    images = postprocess(images)
+    #images = postprocess(images)
     return images
 
 def images_to_grid(images_tensor):
