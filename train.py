@@ -31,6 +31,35 @@ from op import conv2d_gradfix
 from non_leaking import augment, AdaptiveAugment
 
 
+def postprocess(images, min_val=-1.0, max_val=1.0):
+    """Post-processes images from `torch.Tensor` to `numpy.ndarray`.
+
+    Args:
+        images: A `torch.Tensor` with shape `NCHW` to process.
+        min_val: The minimum value of the input tensor. (default: -1.0)
+        max_val: The maximum value of the input tensor. (default: 1.0)
+
+    Returns:
+        A `numpy.ndarray` with shape `NHWC` and pixel range [0, 255].
+    """
+    assert isinstance(images, torch.Tensor)
+    images = images.detach().cpu().numpy()
+    images = (images - min_val) * 255 / (max_val - min_val)
+    images = np.clip(images + 0.5, 0, 255).astype(np.uint8)
+    images = images.transpose(0, 2, 3, 1)
+    return images
+
+
+def synthesize(generator, codes):
+    """Synthesizes images with the give codes."""
+    #images = generator(to_tensor(codes)) ##########
+    images, _ = generator( codes
+                , truncation=1, truncation_latent=None
+            )   # CODES NEED TO BE IN FORMAT: [torch.randn(1, 512, device=device)]
+    images = postprocess(images)
+    return images
+
+
 def data_sampler(dataset, shuffle, distributed):
     if distributed:
         return data.distributed.DistributedSampler(dataset, shuffle=shuffle)
@@ -315,6 +344,11 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                     )
 
             if i % 10000 == 0:
+                with torch.no_grad():
+                    g_ema.eval()
+                    codes = [torch.randn(9, 512, device=device)]
+                    images = synthesize(g_ema, codes)
+                    wandb.log({"Generated Images Grid": wandb.Image(grid_np)})
                 torch.save(
                     {
                         "g": g_module.state_dict(),
