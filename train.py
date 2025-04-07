@@ -11,6 +11,7 @@ from torch.utils import data
 import torch.distributed as dist
 from torchvision import transforms, utils
 from tqdm import tqdm
+import torchvision.utils as vutils
 
 try:
     import wandb
@@ -59,6 +60,11 @@ def synthesize(generator, codes):
     images = postprocess(images)
     return images
 
+def images_to_grid(images_tensor):
+    """
+    Convert a torch tensor of images (NCHW) into a single grid image (CHW).
+    """
+    return vutils.make_grid(images_tensor, nrow=3, normalize=True, scale_each=True)
 
 def data_sampler(dataset, shuffle, distributed):
     if distributed:
@@ -348,7 +354,10 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                     g_ema.eval()
                     codes = [torch.randn(9, 512, device=device)]
                     images = synthesize(g_ema, codes)
-                    wandb.log({"Generated Images Grid": wandb.Image(images)})
+                    grid = images_to_grid(images)
+                    grid_np = grid.permute(1, 2, 0).detach().cpu().numpy() * 255
+                    grid_np = grid_np.astype(np.uint8)
+                    wandb.log({"Generated Images Grid": wandb.Image(grid_np)})
                 torch.save(
                     {
                         "g": g_module.state_dict(),
