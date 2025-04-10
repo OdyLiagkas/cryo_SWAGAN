@@ -316,6 +316,14 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                     )
 
             if i % 10000 == 0:
+                with torch.no_grad():
+                    g_ema.eval()
+                    codes = [torch.randn(9, 512, device=device)]
+                    images = synthesize(g_ema, codes)
+                    grid = images_to_grid(images)
+                    grid_np = grid.permute(1, 2, 0).detach().cpu().numpy() * 255
+                    grid_np = grid_np.astype(np.uint8)
+                    wandb.log({"Generated Images Grid": wandb.Image(grid_np)})
                 torch.save(
                     {
                         "g": g_module.state_dict(),
