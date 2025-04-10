@@ -289,7 +289,7 @@ class Generator(nn.Module):
 
             in_channel = out_channel
 
-        self.iwt = InverseHaarTransform(3)
+        self.iwt = InverseHaarTransform(1)  # Changed channels to 1 from 3 # 10/4 ! 
 
         self.n_latent = self.log_size * 2 - 2
 
@@ -446,7 +446,7 @@ class Discriminator(nn.Module):
             1024: 16 * channel_multiplier,
         }
 
-        self.dwt = HaarTransform(3)
+        self.dwt = HaarTransform(1) # Changed channels to 1 from 3  # 10/4 !
 
         self.from_rgbs = nn.ModuleList()
         self.convs = nn.ModuleList()
