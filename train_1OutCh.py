@@ -210,7 +210,8 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                 real_img_aug = real_img
 
             real_pred = discriminator(real_img_aug)
-            r1_loss = d_r1_loss(real_pred, real_img)
+            #r1_loss = d_r1_loss(real_pred, real_img)
+            r1_loss = d_r1_loss(real_pred, real_img.contiguous())   # 10/4 changed due to an error... RuntimeError: input must be contiguous
 
             discriminator.zero_grad()
             (args.r1 / 2 * r1_loss * args.d_reg_every + 0 * real_pred[0]).backward()
