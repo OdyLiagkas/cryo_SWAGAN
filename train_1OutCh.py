@@ -445,7 +445,7 @@ if __name__ == "__main__":
     args.start_iter = 0
 
     if args.arch == 'stylegan2':
-        from model import Generator, Discriminator
+        from model_1OutCh import Generator, Discriminator
 
     elif args.arch == 'swagan':
         from swagan_1OutCh import Generator, Discriminator
