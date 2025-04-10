@@ -30,8 +30,8 @@ class UpFirDn2dBackward(Function):
         grad_output = grad_output.reshape(-1, out_size[0], out_size[1], 1)
 
         grad_input = upfirdn2d_op.upfirdn2d(
-            grad_output,
-            grad_kernel,
+            grad_output.contiguous(),  # added .contiguous() 10/4
+            grad_kernel.contiguous(),  # added .contiguous() 10/4
             down_x,
             down_y,
             up_x,
@@ -67,8 +67,8 @@ class UpFirDn2dBackward(Function):
         gradgrad_input = gradgrad_input.reshape(-1, ctx.in_size[2], ctx.in_size[3], 1)
 
         gradgrad_out = upfirdn2d_op.upfirdn2d(
-            gradgrad_input,
-            kernel,
+            gradgrad_input.contiguous(),   # added .contiguous() 10/4
+            kernel.contiguous(),       #added .contiguous() 10/4
             ctx.up_x,
             ctx.up_y,
             ctx.down_x,
