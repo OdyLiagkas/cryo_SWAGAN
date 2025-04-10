@@ -31,6 +31,21 @@ from op import conv2d_gradfix
 from non_leaking import augment, AdaptiveAugment
 
 
+def synthesize(generator, codes):
+    """Synthesizes images with the give codes."""
+    #images = generator(to_tensor(codes)) ##########
+    images, _ = generator( codes
+                , truncation=1, truncation_latent=None
+            )   # CODES NEED TO BE IN FORMAT: [torch.randn(1, 512, device=device)]
+    #images = postprocess(images)
+    return images
+
+def images_to_grid(images_tensor):
+    """
+    Convert a torch tensor of images (NCHW) into a single grid image (CHW).
+    """
+    return vutils.make_grid(images_tensor, nrow=3, normalize=True, scale_each=True)
+
 def data_sampler(dataset, shuffle, distributed):
     if distributed:
         return data.distributed.DistributedSampler(dataset, shuffle=shuffle)
